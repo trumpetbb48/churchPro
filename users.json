@@ -1,0 +1,26 @@
+[
+    {
+        "username": "Enock",
+        "is_admin": true,
+        "password_hash": "scrypt:32768:8:1$b4FfC919UOGWdgsF$6850e5e03cc85874624e373781d1ae3a26eaa0f92b7ab1ab8e23d1c95c1fdd743d9ff81acdbcc3cf3869b798869a0a4a1b954f53f0ce1247de50b307e1f481f6",
+        "email": "enock@example.com"
+    },
+    {
+        "username": "Pastor",
+        "is_admin": false,
+        "password_hash": "scrypt:32768:8:1$FuXiTlOs9RPLRgRB$40fc16b1cb92e68eba7005d4d6dd827be68163f20d3530a6ca1e9bcbc6d0d28c1f9ddd184769934db6e1924baa1ae2400b63877a868da85569426d31fe24320b",
+        "email": "pastor@example.com"
+    },
+    {
+        "username": "Secretary",
+        "is_admin": false,
+        "password_hash": "scrypt:32768:8:1$IiustZOzfnthOGhm$010334d185ca44785ec50500a0dff7799c26be9494f98dc2627ce2ecd430d9c5f1d968efb177b320c00d05f0ff363aad8109848c08dbceff95405c3051b1c608",
+        "email": "secretary@example.com"
+    },
+    {
+        "username": "Member1",
+        "is_admin": false,
+        "password_hash": "scrypt:32768:8:1$HBEVURisluS1gKqg$f5d1e05216c36a3a20b9b00f8535b9bb9e1b3f357cbb689395b2de291684b9b6801969b163b95a3b8e654c7cd0dedb76c9795bf1743ac5818680921319377a15",
+        "email": "member1@example.com"
+    }
+]

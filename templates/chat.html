@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header>
+    <a href="/" style="color:white; float:left; text-decoration:none;">⬅ Home</a>
+    <span>Community Chat</span>
+</header>
+
+<div id="messages"></div>
+
+<div class="container" style="position:fixed; bottom:0; width:100%; background:white; display:flex; gap:10px; padding:10px; box-sizing:border-box;">
+    <input id="msg" placeholder="Share with everyone..." style="margin:0;">
+    <button onclick="send()" style="width:80px; margin:0;">Post</button>
+</div>
+
+<script>
+const box = document.getElementById("messages");
+
+function load() {
+    fetch("/chat")
+    .then(res => res.json())
+    .then(data => {
+        box.innerHTML = "";
+        data.forEach(m => {
+            const div = document.createElement("div");
+            div.className = "msg their-msg"; // Simple style for global
+            div.style.maxWidth = "90%";
+
+            const nameEl = document.createElement("small");
+            nameEl.style.color = "#8b0000";
+            nameEl.style.fontWeight = "bold";
+            nameEl.textContent = m.user; // textContent: never trust chat content as HTML
+
+            const textEl = document.createElement("div");
+            textEl.textContent = m.text;
+
+            div.appendChild(nameEl);
+            div.appendChild(textEl);
+            box.appendChild(div);
+        });
+        box.scrollTop = box.scrollHeight;
+    });
+}
+
+function send() {
+    const input = document.getElementById("msg");
+    if(!input.value) return;
+
+    fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ text: input.value })
+    }).then(() => {
+        input.value = "";
+        load();
+    });
+}
+
+setInterval(load, 3000); // Slightly slower for global to save battery
+load();
+</script>
+
+</body>
+</html>

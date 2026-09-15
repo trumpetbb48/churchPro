@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Song Book</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header>
+    <h1>🎵 Song Book</h1>
+</header>
+
+<div class="container">
+    <div style="display:flex; gap:10px; margin-bottom:15px;">
+        <button onclick="showAll()">All</button>
+        <button onclick="showFavorites()" style="background:#555;">⭐ Favorites</button>
+    </div>
+
+    <input type="text" id="search" placeholder="🔍 Search for a song..." onkeyup="filterSongs()">
+    
+    <ul id="songs" style="list-style:none; padding:0;"></ul>
+</div>
+
+<script src="{{ url_for('static', filename='js/songbook.js') }}"></script>
+<script>
+    // Simple filter logic for the search bar
+    function filterSongs() {
+        const query = document.getElementById("search").value.toLowerCase();
+        const items = document.querySelectorAll("#songs li");
+        items.forEach(li => {
+            const title = li.innerText.toLowerCase();
+            li.style.display = title.includes(query) ? "flex" : "none";
+        });
+    }
+</script>
+
+</body>
+</html>

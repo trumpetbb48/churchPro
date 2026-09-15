@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ song.title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .song-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            white-space: pre-line; /* Essential for lyrics! */
+            font-size: 1.2em;
+            line-height: 1.8;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="/songbook" style="color:white; float:left; text-decoration:none;">⬅ Back</a>
+    <span>{{ song.title }}</span>
+</header>
+
+<div class="container">
+    <div class="song-content">
+        {{ song.text }}
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="hero">
+        <h1>I am with you</h1>
+        <p>Genesis 28:15</p>
+    </div>
+
+    <div class="menu">
+        <div class="menu-item" onclick="location.href='/songbook'">
+            <i class="fa-solid fa-music"></i><p>Song Book</p>
+        </div>
+        <div class="menu-item" onclick="location.href='/chat_page'">
+            <i class="fa-solid fa-comments"></i><p>Global Chat</p>
+        </div>
+        <div class="menu-item" onclick="location.href='/users_page'">
+            <i class="fa-solid fa-user"></i><p>Private Chat</p>
+        </div>
+        <div class="menu-item" onclick="location.href='/calendar'">
+            <i class="fa-solid fa-calendar"></i><p>Calendar</p>
+        </div>
+        {% if is_admin %}
+        <div class="menu-item" onclick="location.href='/admin'">
+            <i class="fa-solid fa-lock"></i><p>Admin</p>
+        </div>
+        {% endif %}
+        <div class="menu-item" onclick="location.href='/change_password'">
+            <i class="fa-solid fa-key"></i><p>Change Password</p>
+        </div>
+        <div class="menu-item" onclick="location.href='/logout'">
+            <i class="fa-solid fa-right-from-bracket"></i><p>Logout</p>
+        </div>
+    </div>
+
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/static/sw.js");
+        }
+    </script>
+</body>
+</html>

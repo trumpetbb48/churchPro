@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header>
+    <a href="/" style="color:white; float:left; text-decoration:none;">⬅ Home</a>
+    <span>Select User</span>
+</header>
+
+<div class="container">
+    <ul id="userList" style="list-style:none; padding:0;"></ul>
+</div>
+
+<script>
+    const myName = "{{ session.get('username') }}";
+
+    function loadUsers() {
+        fetch("/users")
+            .then(res => res.json())
+            .then(users => {
+                const list = document.getElementById("userList");
+                list.innerHTML = "";
+
+                users.forEach(user => {
+                    if (user === myName) return; // Don't chat with yourself
+
+                    const li = document.createElement("li");
+                    li.className = "menu-item";
+                    li.style.display = "flex";
+                    li.style.alignItems = "center";
+                    li.style.gap = "15px";
+
+                    const icon = document.createElement("i");
+                    icon.className = "fa-solid fa-circle-user";
+                    icon.style.fontSize = "1.5em";
+                    icon.style.color = "#d4af37";
+
+                    const nameEl = document.createElement("strong");
+                    nameEl.textContent = user;
+
+                    li.appendChild(icon);
+                    li.appendChild(nameEl);
+                    li.onclick = () => {
+                        location.href = "/chat/" + user;
+                    };
+                    list.appendChild(li);
+                });
+            });
+    }
+    loadUsers();
+</script>
+</body>
+</html>

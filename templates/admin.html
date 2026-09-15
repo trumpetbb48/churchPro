@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Manage</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .song-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .song-row span { text-align: left; flex: 1; }
+        .song-row button { width: auto; padding: 6px 12px; margin: 0; }
+        .edit-btn { background: #d4af37; }
+        .delete-btn { background: #8b0000; }
+        .sync-btn { background: #2a6f2a; }
+        #syncStatus, #songMessage { font-size: 0.9em; margin-top: 8px; white-space: pre-wrap; }
+        #editForm { display: none; margin-top: 15px; border-top: 2px solid #d4af37; padding-top: 15px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>✏️ Admin Management</h1>
+</header>
+
+<div class="container">
+
+    <div class="menu-item">
+        <h3>Add New Song</h3>
+        <input id="title" placeholder="Song Title">
+        <textarea id="text" placeholder="Lyrics" rows="5"></textarea>
+        <button onclick="saveLyric()">Save Song</button>
+        <div id="songMessage"></div>
+    </div>
+
+    <div class="menu-item" style="margin-top:20px;">
+        <h3>Manage Songs</h3>
+        <button class="sync-btn" onclick="syncLyrics()">🔄 Sync New Songs</button>
+        <div id="syncStatus"></div>
+
+        <div id="songList" style="margin-top:15px; text-align:left;"></div>
+
+        <div id="editForm">
+            <h4>Edit Song</h4>
+            <input id="editTitle" placeholder="Song Title">
+            <textarea id="editText" placeholder="Lyrics" rows="5"></textarea>
+            <button onclick="saveEdit()">Save Changes</button>
+            <button style="background:#555;" onclick="cancelEdit()">Cancel</button>
+        </div>
+    </div>
+
+    <div class="menu-item" style="margin-top:20px;">
+        <h3>Add New Event</h3>
+        <input id="eventTitle" placeholder="Event Name">
+        <input type="date" id="eventDate">
+        <input type="time" id="eventTime">
+        <button onclick="saveEvent()">Schedule Event</button>
+    </div>
+
+    <div class="menu-item" style="margin-top:20px;">
+        <h3>Password Resets</h3>
+        <p style="font-size:0.9em;">Someone locked out? Send them to <a href="{{ url_for('forgot_password') }}">Forgot Password</a> — you can't reset it for them from here.</p>
+    </div>
+
+    <button onclick="location.href='/logout'" style="background:#555; margin-top:20px;">Logout</button>
+</div>
+
+<script>
+let originalTitleBeingEdited = null;
+
+function saveLyric() {
+    const data = { title: title.value, text: text.value, favorite: false };
+    fetch("/lyrics", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json().then(body => ({ ok: r.ok, body })))
+    .then(({ ok, body }) => {
+        const msg = document.getElementById("songMessage");
+        if (ok && body.success) {
+            msg.style.color = "#2a6f2a";
+            msg.textContent = "Saved!";
+            title.value = "";
+            text.value = "";
+            loadSongList();
+        } else {
+            msg.style.color = "#8b0000";
+            msg.textContent = body.message || "Couldn't save the song.";
+        }
+    })
+    .catch(() => {
+        document.getElementById("songMessage").textContent = "Network error — try again.";
+    });
+}
+
+function loadSongList() {
+    fetch("/lyrics")
+        .then(r => r.json())
+        .then(songs => {
+            const list = document.getElementById("songList");
+            list.innerHTML = "";
+            songs.forEach(song => {
+                const row = document.createElement("div");
+                row.className = "song-row";
+
+                const nameSpan = document.createElement("span");
+                nameSpan.textContent = song.title; // textContent, not innerHTML — titles are user-submitted
+
+                const editBtn = document.createElement("button");
+                editBtn.className = "edit-btn";
+                editBtn.textContent = "Edit";
+                editBtn.addEventListener("click", () => startEdit(song));
+
+                const delBtn = document.createElement("button");
+                delBtn.className = "delete-btn";
+                delBtn.textContent = "Delete";
+                delBtn.addEventListener("click", () => deleteSong(song.title));
+
+                row.appendChild(nameSpan);
+                row.appendChild(editBtn);
+                row.appendChild(delBtn);
+                list.appendChild(row);
+            });
+        });
+}
+
+function startEdit(song) {
+    originalTitleBeingEdited = song.title;
+    document.getElementById("editTitle").value = song.title;
+    document.getElementById("editText").value = song.text || "";
+    document.getElementById("editForm").style.display = "block";
+    document.getElementById("editForm").scrollIntoView({ behavior: "smooth" });
+}
+
+function cancelEdit() {
+    originalTitleBeingEdited = null;
+    document.getElementById("editForm").style.display = "none";
+}
+
+function saveEdit() {
+    if (!originalTitleBeingEdited) return;
+    const data = {
+        original_title: originalTitleBeingEdited,
+        title: document.getElementById("editTitle").value,
+        text: document.getElementById("editText").value
+    };
+    fetch("/lyrics/edit", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json().then(body => ({ ok: r.ok, body })))
+    .then(({ ok, body }) => {
+        if (ok && body.success) {
+            cancelEdit();
+            loadSongList();
+        } else {
+            alert(body.message || "Couldn't save changes.");
+        }
+    })
+    .catch(() => alert("Network error — try again."));
+}
+
+function deleteSong(title) {
+    if (!confirm(`Delete "${title}"? This can't be undone.`)) return;
+    fetch("/lyrics/delete", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ title })
+    })
+    .then(r => r.json().then(body => ({ ok: r.ok, body })))
+    .then(({ ok, body }) => {
+        if (ok && body.success) {
+            loadSongList();
+        } else {
+            alert(body.message || "Couldn't delete the song.");
+        }
+    })
+    .catch(() => alert("Network error — try again."));
+}
+
+function syncLyrics() {
+    const status = document.getElementById("syncStatus");
+    status.style.color = "#333";
+    status.textContent = "Syncing... this can take up to a minute.";
+
+    fetch("/admin/sync_lyrics", { method: "POST" })
+        .then(r => r.json().then(body => ({ ok: r.ok, body })))
+        .then(({ ok, body }) => {
+            if (ok && body.success) {
+                status.style.color = "#2a6f2a";
+                status.textContent = body.added > 0
+                    ? `Added ${body.added} new song(s): ${body.added_titles.join(", ")}`
+                    : "No new songs found.";
+                loadSongList();
+            } else {
+                status.style.color = "#8b0000";
+                status.textContent = body.message || "Sync failed.";
+            }
+        })
+        .catch(() => {
+            status.style.color = "#8b0000";
+            status.textContent = "Network error — try again.";
+        });
+}
+
+function saveEvent() {
+    const data = { title: eventTitle.value, date: eventDate.value, time: eventTime.value };
+    fetch("/events", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    }).then(() => { alert("Event Added!"); location.reload(); });
+}
+
+loadSongList();
+</script>
+</body>
+</html>

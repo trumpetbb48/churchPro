@@ -1,0 +1,14 @@
+# Secrets — never commit these
+INITIAL_CREDENTIALS.txt
+password_resets.json
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# OS/editor cruft
+.DS_Store
+*.swp

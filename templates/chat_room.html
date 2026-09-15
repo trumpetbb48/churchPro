@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with {{ user }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header>
+    <a href="/users_page" style="color:white; float:left; text-decoration:none;">⬅ Back</a>
+    <span>{{ user }}</span>
+</header>
+
+<div id="messages"></div>
+
+<div class="container" style="position:fixed; bottom:0; width:100%; background:white; display:flex; gap:10px; padding:10px; box-sizing:border-box;">
+    <input id="msg" placeholder="Type a message..." style="margin:0;">
+    <button onclick="send()" style="width:80px; margin:0;">Send</button>
+</div>
+
+<script>
+const currentUser = "{{ session.get('username') }}";
+const otherUser = "{{ user }}";
+const box = document.getElementById("messages");
+
+function load() {
+    fetch("/messages/" + otherUser)
+    .then(res => res.json())
+    .then(data => {
+        box.innerHTML = "";
+        data.forEach(m => {
+            const div = document.createElement("div");
+            div.className = m.from === currentUser ? "msg my-msg" : "msg their-msg";
+            div.innerText = m.text;
+            box.appendChild(div);
+        });
+        box.scrollTop = box.scrollHeight; // Auto-scroll to bottom
+    });
+}
+
+function send() {
+    const input = document.getElementById("msg");
+    if(!input.value) return;
+
+    fetch("/send_dm", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ to: otherUser, text: input.value })
+    }).then(() => {
+        input.value = "";
+        load();
+    });
+}
+
+setInterval(load, 2000);
+load();
+</script>
+
+</body>
+</html>

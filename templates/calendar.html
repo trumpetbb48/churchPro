@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Church Calendar</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header>
+    <h1>📅 Church Calendar</h1>
+</header>
+
+<div class="container">
+    <div id="reminderBox" style="display:none; background:#fff3e0; padding:15px; border-radius:10px; margin-bottom:20px; border-left: 5px solid #d4af37;"></div>
+
+    <ul id="eventList" style="list-style:none; padding:0;"></ul>
+</div>
+
+<script src="{{ url_for('static', filename='js/notify.js') }}"></script>
+<script>
+    const isAdmin = {{ is_admin|tojson }};
+
+    function loadEvents() {
+        fetch("/events")
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById("eventList");
+                list.innerHTML = "";
+                
+                // Sort by date
+                data.sort((a,b) => new Date(a.date + "T" + a.time) - new Date(b.date + "T" + b.time));
+
+                data.forEach(e => {
+                    const li = document.createElement("li");
+                    li.className = "menu-item"; // Reuse styling
+                    li.style.display = "flex";
+                    li.style.justifyContent = "space-between";
+
+                    const info = document.createElement("div");
+                    info.style.textAlign = "left";
+
+                    const title = document.createElement("strong");
+                    title.textContent = e.title;
+
+                    const when = document.createElement("small");
+                    when.textContent = `📅 ${e.date} | ⏰ ${e.time}`;
+
+                    info.appendChild(title);
+                    info.appendChild(document.createElement("br"));
+                    info.appendChild(when);
+                    li.appendChild(info);
+
+                    if (isAdmin) {
+                        const delBtn = document.createElement("button");
+                        delBtn.textContent = "X";
+                        delBtn.style.width = "40px";
+                        delBtn.style.background = "red";
+                        delBtn.addEventListener("click", () => deleteEvent(e.title));
+                        li.appendChild(delBtn);
+                    }
+
+                    list.appendChild(li);
+                });
+                
+                if(window.checkReminders) checkReminders(data);
+            });
+    }
+
+    function deleteEvent(title) {
+        fetch("/events/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title })
+        }).then(() => loadEvents());
+    }
+
+    loadEvents();
+</script>
+</body>
+</html>
